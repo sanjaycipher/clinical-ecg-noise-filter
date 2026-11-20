@@ -1,0 +1,8 @@
+mne
+neurokit2
+scipy
+matplotlib
+pandas
+numpy
+wfdb
+pyedflib

@@ -1,0 +1,10 @@
+# Large medical datasets and EDF binaries
+*.edf
+*.pkl
+mit-bih-long-term-ecg-database-1.0.0/
+
+# Generated previews and logs
+*.png
+*.log
+__pycache__/
+.ipynb_checkpoints/
