@@ -5,6 +5,7 @@ mit-bih-long-term-ecg-database-1.0.0/
 
 # Generated previews and logs
 *.png
+!Accuracy_Visual_Proof.png
 *.log
 __pycache__/
 .ipynb_checkpoints/
