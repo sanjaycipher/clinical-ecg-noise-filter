@@ -122,9 +122,13 @@ export default function App() {
     setUploadPercent(0);
 
     try {
-      const data = await uploadEDF(selectedFile, (percent) => {
-        setUploadPercent(percent);
+      const response = await uploadEDF(selectedFile, (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setUploadPercent(percent);
+        }
       });
+      const data = response?.data || response;
 
       if (data && data.success) {
         setResults(data);
