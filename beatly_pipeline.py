@@ -440,9 +440,9 @@ def generate_pdf_report(
         plt.close(fig1)
 
         # ====================================================================
-        # TIER 2: PAGES 2+ - EVENT MORPHOLOGY ZOOM (FIRST 5 PER EVENT TYPE)
+        # TIER 2: PAGES 2+ - EVENT MORPHOLOGY ZOOM (SUSTAINED 10s EVENT BLOCKS)
         # ====================================================================
-        # Group contiguous occurrences by event type
+        # Group contiguous occurrences into continuous blocks per event type
         occurrences: Dict[str, List[Tuple[float, float]]] = {
             "LD": [],
             "Noise": [],
@@ -471,14 +471,27 @@ def generate_pdf_report(
             if c_lbl in occurrences:
                 occurrences[c_lbl].append((c_start, c_end))
 
+        # Search window_labels for continuous blocks of AT LEAST 10 SECONDS
+        # (ensures the 10-second visual strip shows 10s of actual sustained event morphology)
+        continuous_10s_events: Dict[str, List[Tuple[float, float]]] = {}
+        for event_type, block_list in occurrences.items():
+            # Filter for blocks of >= 10 consecutive seconds
+            blocks_10s = [b for b in block_list if (b[1] - b[0]) >= 10.0]
+            if blocks_10s:
+                continuous_10s_events[event_type] = blocks_10s[:5]
+            else:
+                # Fallback to the longest available continuous blocks if none reach 10s
+                fallback = sorted(block_list, key=lambda b: (b[1] - b[0]), reverse=True)
+                continuous_10s_events[event_type] = fallback[:5]
+
         # Generate zoom pages in clinical sequence: LD, Noise, Bradycardia
         event_order = ["LD", "Noise", "Bradycardia"]
         total_zoom_pages = 0
 
         for event_type in event_order:
-            event_list = occurrences[event_type][:5]  # First 5 occurrences
+            event_list = continuous_10s_events.get(event_type, [])
             for occ_idx, (occ_start, occ_end) in enumerate(event_list, start=1):
-                # Target exact 10-second window starting at event onset
+                # Extract the 10-second window starting at the onset of the continuous block
                 win_start = occ_start
                 win_end = min(total_seconds, win_start + 10.0)
                 if win_end - win_start < 10.0:
